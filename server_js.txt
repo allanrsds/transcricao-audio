@@ -1,0 +1,39 @@
+import express from "express";
+import multer from "multer";
+import cors from "cors";
+import fs from "fs";
+import { Configuration, OpenAIApi } from "openai";
+
+const app = express();
+app.use(cors());
+const upload = multer({ dest: "uploads/" });
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
+app.post("/transcribe", upload.single("audio"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No audio file uploaded" });
+    }
+
+    const response = await openai.createTranscription(
+      fs.createReadStream(req.file.path),
+      "whisper-1"
+    );
+
+    fs.unlinkSync(req.file.path); // Apaga o arquivo após transcrição
+
+    res.json({ transcription: response.data.text });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao transcrever áudio" });
+  }
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Servidor rodando na porta ${port}`);
+});

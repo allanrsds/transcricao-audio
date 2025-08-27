@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Transcrição de Áudio com Whisper</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    h1 { text-align: center; }
+    #transcription { margin-top: 20px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Transcrição de Áudio</h1>
+  <form id="uploadForm">
+    <input type="file" accept="audio/*" name="audio" required />
+    <button type="submit">Enviar</button>
+  </form>
+  <div id="transcription"></div>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+    const transcriptionDiv = document.getElementById("transcription");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      transcriptionDiv.textContent = "Transcrevendo...";
+
+      const formData = new FormData(form);
+      try {
+        const response = await fetch("http://localhost:3000/transcribe", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          transcriptionDiv.textContent = data.transcription;
+        } else {
+          transcriptionDiv.textContent = "Erro: " + (data.error || "Desconhecido");
+        }
+      } catch (err) {
+        transcriptionDiv.textContent = "Erro de conexão: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
