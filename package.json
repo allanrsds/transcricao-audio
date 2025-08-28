@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Projeto para transcrever áudio usando Node.js e OpenAI Whisper",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js"
   },
